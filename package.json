@@ -1,0 +1,16 @@
+{
+  "name": "mysql-crud",
+  "version": "0.1.0",
+  "description": "Dynamic Data Access Layer for MySQL",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Wes Cutting",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "mysql": "^2.17.1"
+  }
+}
