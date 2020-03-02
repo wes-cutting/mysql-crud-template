@@ -5,12 +5,37 @@ class MySQLTableCRUD {
      * @description Preconfigures an instance of this class with the dynamic values needed for basic CRUD
      * @param {object} dbCxt Specify Database Context information for MySQL
      * @param {object} schema Provide a model to validate records 
+     * @summary Example of dbCxt: 
+     *          {
+     *              host: @type {STRING},
+     *              user: @type {STRING},
+     *              password: @type {STRING},
+     *              database: @type {STRING}, 
+     *              table: @type {STRING}
+     *          }
+     *          Example of schema (array of column criteria objects): 
+     *          [
+     *              {
+     *                  name: @type {STRING},
+     *                  type: @type {STRING},
+     *                  required: @type {BOOLEAN},
+     *                  rules: [
+     *                      {
+     *                          type: @type {STRING},
+     *                          data: @type {NUMBER}
+     *                      },
+     *                      ...
+     *                  ]
+     *              },
+     *              ...
+     *          ]
      */
     constructor(dbCxt, schema){
         try{
             this.validateConstructor(dbCxt, schema)
             const {table, ...context} = dbCxt
             this.table = table
+            this.schema = schema
             
             this.pool = mysql.createPool({
                 connectionLimit: 20,
@@ -36,8 +61,8 @@ class MySQLTableCRUD {
     validateConstructor(dbCxt, schema){
         if(typeof dbCxt !== 'object'){
             throw 'DAL----dbCxt needs to be an Object'
-        }else if(typeof schema !== 'object'){
-            throw 'DAL----schema needs to be an Object'
+        }else if(!Array.isArray(schema)){
+            throw 'DAL----schema needs to be an Array'
         }
 
         if(!dbCxt.host || typeof dbCxt.host !== 'string'){
@@ -50,6 +75,27 @@ class MySQLTableCRUD {
             throw 'DAL----Database Context needs a valid Database'
         }else if(!dbCxt.table || typeof dbCxt.table !== 'string'){
             throw 'DAL----Database Context needs a Table'
+        }
+    }
+    // {
+    //     name: "username",
+    //     type: "string",
+    //     required: true,
+    // }
+    validateRecord(record, action){
+        let propName;
+        for(let i = 0; i < this.schema.length; i++){
+            propName = this.schema[i].name
+            if(this.schema[i].required){
+                if(!record[propName]){
+                    throw `DAL---- '${propName}' field is Required to ${action}`
+                }
+            }
+            if(record[propName]){
+                if(typeof record[propName] !== this.schema[i].type){
+                    throw `DAL---- '${propName}' field type does not match Schema`
+                }
+            }
         }
     }
 
@@ -167,7 +213,8 @@ class MySQLTableCRUD {
     }
 
     createOne(record){
-
+        this.validateRecord(record, 'Create One')
+        return 'Success'
     }
 
     createMany(records){

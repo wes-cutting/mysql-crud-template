@@ -3,16 +3,39 @@ const dotenv = require('dotenv')
 dotenv.config()
 
 const sampleContext = {
-    host: 'localhost',
+    host: process.env.HOST,
     user: process.env.USER,
     password: process.env.PASSWORD,
     database: process.env.DATABASE, 
     table: process.env.TABLE
 }
 
+const schema = [
+    {
+        name: "username",
+        type: "string",
+        required: true,
+    },
+    {
+        name: "email",
+        type: "string",
+        required: false,
+    },
+    {
+        name: "password",
+        type: "string",
+        required: false,
+    },
+    {
+        name: "favorite-color",
+        type: "string",
+        required: false,
+    },
+]
+
 const main = async () => {
     try{
-        const example = new TableCrud(sampleContext, {})
+        const example = new TableCrud(sampleContext, schema)
         const testConnectResult = await example.testConnection() ? 
             'Test Connection Succeeded' :
             'Test Connection Failed'
@@ -24,13 +47,17 @@ const main = async () => {
 
         const testAll = await example.findAll()
         console.log('Find All', testAll)
-        console.log('typeof', typeof testestAlltCount)
+        console.log('typeof', typeof testAll)
 
-        const testRange = await example.findRange(1, 100)
-        console.log('Find Range ', testRange)
+        const testRange = await example.findRange(1, 2)
+        console.log('Find Range', testRange)
         console.log('typeof', typeof testRange)
 
-
+        const testCreateOne = await example.createOne({
+            
+            email: 'test1.test.test'
+        })
+        console.log('Create One', testCreateOne)
 
         const testConnectResult2 = await example.testConnection() ? 
             'Test Connection 2 Succeeded' :
