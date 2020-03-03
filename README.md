@@ -22,6 +22,8 @@ Any Documentation or Resources used through out the development process will be 
     - JavaScript Classes found on [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes)
     - Clean up a Node Package Exit, [StackOverFlow](https://stackoverflow.com/questions/14031763/doing-a-cleanup-action-just-before-node-js-exits)
     - MySQL [Select Statement](https://dev.mysql.com/doc/refman/5.6/en/select.html) support 
+    - Implemented [Mocha](https://mochajs.org/) as an Unit Testing Framework
+    - Global Setup and Teardown using [Mocha Hooks](https://mochajs.org/#hooks)
 - ### Project Setup
     - JSDoc Comments for JavaScript Intellisense found on [MSDN](https://docs.microsoft.com/en-us/visualstudio/ide/create-jsdoc-comments-for-javascript-intellisense?view=vs-2015)
     - Markdown Syntax found on [Markdown Guide](https://www.markdownguide.org/basic-syntax/)

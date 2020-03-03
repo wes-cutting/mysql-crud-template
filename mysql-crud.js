@@ -30,19 +30,21 @@ class MySQLTableCRUD {
      *              ...
      *          ]
      */
-    constructor(dbCxt, schema){
+    constructor(dbCxt, schema, debug){
         try{
             this.validateConstructor(dbCxt, schema)
             const {table, ...context} = dbCxt
             this.table = table
             this.schema = schema
-            
+            this.debug = debug
+
             this.pool = mysql.createPool({
                 connectionLimit: 20,
                 ...context
             })
-            this.pool.on('release', function (connection) {
-                console.log('DAL----Connection %d released', connection.threadId);
+            this.pool.on('release', (connection) => {
+
+                this.print(`DAL----Connection ${connection.threadId} released` );
               });
         }catch(err){
             throw err
@@ -56,6 +58,12 @@ class MySQLTableCRUD {
 
         this.validateConstructor = this.validateConstructor.bind(this)
         this.testConnection = this.testConnection.bind(this)
+    }
+
+    print = (message) => {
+        if(this.debug){
+            console.log(message)
+        }
     }
 
     validateConstructor(dbCxt, schema){
@@ -77,11 +85,7 @@ class MySQLTableCRUD {
             throw 'DAL----Database Context needs a Table'
         }
     }
-    // {
-    //     name: "username",
-    //     type: "string",
-    //     required: true,
-    // }
+    
     validateRecord(record, action){
         let propName;
         for(let i = 0; i < this.schema.length; i++){
@@ -102,14 +106,14 @@ class MySQLTableCRUD {
     testConnection(){
         const table = this.table
         const result = new Promise((resolve, reject) => {
-            console.log(`DAL ${table}----Testing Connection`)
-            this.pool.getConnection(function(err, connection){
+            this.print(`DAL ${table}----Testing Connection`)
+            this.pool.getConnection((err, connection) => {
                 if (err) {
                     reject(err)
                 }
                 else {
                     resolve(connection._socket.readable)
-                    console.log(`DAL ${table}----Releasing Test Connection`)
+                    this.print(`DAL ${table}----Releasing Test Connection`)
                     connection.release()
                 }
             })
@@ -118,19 +122,19 @@ class MySQLTableCRUD {
     }
 
     endConnectionPool = (options, exitCode) => {
-        console.log('Options', options, ': ExitCode', exitCode)
+        this.print('Options:', options, ', ExitCode:', exitCode)
         if (options.cleanup) {
-            console.log(`DAL----Ending Pool for ${this.table}`)
-            this.pool.end(()=>console.log(`DAL----Ended Pool for ${this.table}`))
+            this.print(`DAL----Ending Pool for ${this.table}`)
+            this.pool.end(()=>this.print(`DAL----Ended Pool for ${this.table}`))
         }
-        if (exitCode || exitCode === 0) console.log(exitCode);
+        if (exitCode || exitCode === 0) this.print(exitCode);
         if (options.exit) process.exit();
     }
 
     count(){
         const table = this.table
         const result = new Promise((resolve, reject) => {
-            console.log(`DAL ${table}----Connection for Count`)
+            this.print(`DAL ${table}----Connection for Count`)
             this.pool.getConnection(async function(err, connection){
                 if (err) {
                     reject(err)
@@ -145,7 +149,7 @@ class MySQLTableCRUD {
                                 resolve(results[0].count)
                             }
                         })
-                    console.log(`DAL ${table}----Releasing Connection for Count`)
+                    this.print(`DAL ${table}----Releasing Connection for Count`)
                     connection.release()
                 }
             })
@@ -163,7 +167,7 @@ class MySQLTableCRUD {
         }
         const table = this.table
         const result = new Promise((resolve, reject) => {
-            console.log(`DAL ${table}----Connection for Find Range`)
+            this.print(`DAL ${table}----Connection for Find Range`)
             this.pool.getConnection(async function(err, connection){
                 if (err) {
                     reject(err)
@@ -178,7 +182,7 @@ class MySQLTableCRUD {
                                 resolve(results)
                             }
                         })
-                    console.log(`DAL ${table}----Releasing Connection for Find Range`)
+                    this.print(`DAL ${table}----Releasing Connection for Find Range`)
                     connection.release()
                 }
             })
@@ -189,7 +193,7 @@ class MySQLTableCRUD {
     findAll(){
         const table = this.table
         const result = new Promise((resolve, reject) => {
-            console.log(`DAL ${table}----Connection for Find All`)
+            this.print(`DAL ${table}----Connection for Find All`)
             this.pool.getConnection(async function(err, connection){
                 if (err) {
                     reject(err)
@@ -204,7 +208,7 @@ class MySQLTableCRUD {
                                 resolve(results)
                             }
                         })
-                    console.log(`DAL ${table}----Releasing Connection for Find All`)
+                    this.print(`DAL ${table}----Releasing Connection for Find All`)
                     connection.release()
                 }
             })
